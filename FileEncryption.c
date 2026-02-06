@@ -76,12 +76,13 @@ void XOR(char *org, char *dest, char *mpass, int size)
 {
     unsigned char byte;
     char *destinationFile, *ext;
+    ext = malloc(strlen(strstr(org, ".")));
     ext = strstr(org, ".");
     if(ext != NULL) // Extension exists
     {
         if(strcmp(ext, ".dat") == NULL) // Wasn't encrypted previously
         {
-            if(strcmp(dest, NULL)) dest = org; // If destination wasn't specified...
+            if(dest == NULL) dest = org; // If destination wasn't specified...
             sprintf(destinationFile, "%s.dat", dest);
             
             // Encrypt the file type in the header
@@ -90,7 +91,7 @@ void XOR(char *org, char *dest, char *mpass, int size)
             header[0] = extSize;
             for(int i = 1; i < extSize; i++)
             {
-                sprintf(header, "%s%s", header, ext[i]);
+                sprintf(header + strlen(header), "%c",(char) ext[i]);
             }
             FILE *d = fopen(destinationFile, "w");
             fwrite(d, sizeof(int), 1, extSize^mpass[0]);
@@ -121,4 +122,5 @@ void XOR(char *org, char *dest, char *mpass, int size)
         else i++;
     }
     printf("Encrypted the file and stored it as %s", destinationFile);
+    free(ext);
 }
