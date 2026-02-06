@@ -42,10 +42,11 @@ int main(int argc, char *argv[])
                     break;
                 case 'l':
                     char *dest = argv[i+1];
-                    
             }
         }
     }
+    XOR(org, dest, mpass, size);
+
 }
 
 /*
@@ -85,10 +86,12 @@ void XOR(char *org, char *dest, char *mpass, int size)
             }
             FILE *d = fopen(destinationFile, "w");
             fwrite(d, sizeof(int), 1, extSize^mpass[0]);
-            fwrite(d, sizeof(header), 1, header^ext[1:]);
+            for(int i = 0; i < strlen(header); i++)
+            {
+                fwrite(d, sizeof(char), 1, header[i]^ext[i+1]);
+            }
             fclose(d);
             d = NULL;
-            
         }
         else // Was encrypted
         {
