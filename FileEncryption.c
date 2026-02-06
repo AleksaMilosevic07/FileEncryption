@@ -24,28 +24,36 @@ int main(int argc, char *argv[])
             switch (argv[i][1])
             {
                 case 'm':
-                    *mpass = argv[i+1];
-                    while(mpass[i] != '\0')
+                    mpass = malloc(strlen(argv[i+1]) + 1);
+                    strcpy(mpass, argv[i+1]);
+                    while(mpass[size] != '\0')
                     {
-                        mpass[i] = tolower(mpass[i]);
+                        mpass[size] = tolower(mpass[size]);
                         size++;
                     }
                     break;
                 case 'f':
-                    char *org = argv[i+1];
+                    org = malloc(strlen(argv[i+1]) + 1);
+                    strcpy(org, argv[i+1]);
                     f = fopen(org, "r");
                     if(f == NULL)
                     {
                         printf("Couldnt open the file!\n");
                         return 1;
                     }
+                    fclose(f);
                     break;
                 case 'l':
-                    char *dest = argv[i+1];
+                    dest = malloc(strlen(argv[i+1]) + 1);
+                    strcpy(dest, argv[i+1]);
+                    break;
             }
         }
     }
     XOR(org, dest, mpass, size);
+    free(mpass);
+    free(org);
+    free(dest);
 
 }
 
@@ -79,10 +87,10 @@ void XOR(char *org, char *dest, char *mpass, int size)
             // Encrypt the file type in the header
             int extSize = strlen(ext);
             char *header = NULL;
-            header = (char) extSize;
+            header[0] = extSize;
             for(int i = 1; i < extSize; i++)
             {
-                sprinf(header, "%s%s", header, ext[i]);
+                sprintf(header, "%s%s", header, ext[i]);
             }
             FILE *d = fopen(destinationFile, "w");
             fwrite(d, sizeof(int), 1, extSize^mpass[0]);
