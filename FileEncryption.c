@@ -80,24 +80,27 @@ void XOR(char *org, char *dest, char *mpass, int size)
     ext = strstr(org, ".");
     if(ext != NULL) // Extension exists
     {
-        if(strcmp(ext, ".dat") == NULL) // Wasn't encrypted previously
+        if(strcmp(ext, ".dat") != 0) // Wasn't encrypted previously
         {
             if(dest == NULL) dest = org; // If destination wasn't specified...
+            destinationFile = malloc(sprintf(destinationFile, "%s.dat", dest));
             sprintf(destinationFile, "%s.dat", dest);
             
             // Encrypt the file type in the header
             int extSize = strlen(ext);
-            char *header = NULL;
+            char *header = malloc(extSize + 2);
             header[0] = extSize;
             for(int i = 1; i < extSize; i++)
             {
                 sprintf(header + strlen(header), "%c",(char) ext[i]);
             }
             FILE *d = fopen(destinationFile, "w");
-            fwrite(d, sizeof(int), 1, extSize^mpass[0]);
-            for(int i = 0; i < strlen(header); i++)
+            unsigned char bb = (unsigned char)extSize^(unsigned char)mpass[0];
+            fwrite(&bb, sizeof(unsigned char), 1, d);
+            for(int i = 1; i < strlen(header); i++)
             {
-                fwrite(d, sizeof(char), 1, header[i]^ext[i+1]);
+                unsigned char byte = (unsigned char)header[i]^mpass[i];
+                fwrite(&byte, sizeof(unsigned char), 1, d);
             }
             fclose(d);
             d = NULL;
@@ -107,20 +110,23 @@ void XOR(char *org, char *dest, char *mpass, int size)
             FILE *d = fopen(destinationFile, "r");
             int extSize = 0;
             char *header = NULL;
-            if(strcmp(dest, NULL)) dest = org;
+            if(dest == NULL) dest = org;
             sprintf(destinationFile, "%s.%s", dest, ext);
         }
     }
     else destinationFile = dest;
     
     FILE *d = fopen(destinationFile, "a");
+    FILE *f_org = fopen(org, "r");
     int i = 0;
-    while(fread(org, 1, 1, byte))
+    while(fread(&byte, 1, 1, f_org))
     {
-        fwrite(d, 1, 1, byte^mpass[i]);
+        byte = byte^mpass[i];
+        fwrite(&byte, 1, 1, d);
         if(i == size) i = 0;
         else i++;
     }
     printf("Encrypted the file and stored it as %s", destinationFile);
     free(ext);
+    free(destinationFile);
 }
